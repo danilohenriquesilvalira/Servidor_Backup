@@ -1,0 +1,33 @@
+# docker-compose.dev.yml — modo desenvolvimento com hot-reload automatico
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Frontend: Vite HMR (reflete mudancas em < 1s sem rebuild)
+# Backend:  Node --watch (reinicia automaticamente ao salvar .js)
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/src:/app/src   # monta codigo fonte — Node --watch detecta mudancas
+    environment:
+      NODE_ENV: development
+    command: node --watch src/server.js
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev  # imagem leve com Vite dev server
+    image: rls-backup-frontend-dev  # tag separada — nao sobrescreve a imagem de producao
+    volumes:
+      - ./frontend/src:/app/src         # hot module replacement instantaneo
+      - ./frontend/public:/app/public   # logo e assets publicos
+    ports:
+      - "${FRONTEND_PORT:-3009}:3000"
+    environment:
+      VITE_BACKEND_URL: http://backend:3001
+    command: npm run dev -- --host 0.0.0.0
+    # Nao depende do build de producao
+    depends_on:
+      - backend
