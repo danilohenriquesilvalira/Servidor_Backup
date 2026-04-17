@@ -6,6 +6,7 @@
     "core:default",
     "opener:default",
     "http:default",
+    "http:allow-fetch",
     "notification:default",
     "store:default",
     "fs:default"

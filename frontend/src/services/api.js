@@ -2,7 +2,10 @@ import axios from 'axios'
 import { isTauri, getServerUrl } from '../utils/platform'
 
 const api = axios.create({
-  timeout: 300000 // 5 minutos para uploads grandes
+  timeout: 300000, // 5 minutos para uploads grandes
+  // Em Tauri usa fetch adapter (que usa o fetch nativo sobrescrito em main.jsx),
+  // evitando bloqueio de mixed-content do WebView no Windows.
+  adapter: isTauri() ? 'fetch' : 'xhr'
 })
 
 // Resolve URL dinamicamente: Tauri usa servidor configurado, web usa proxy relativo
