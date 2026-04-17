@@ -20,3 +20,13 @@ backend/dist/
 # Backend uploads
 backend/uploads/
 uploads/
+
+# Tauri build artifacts
+frontend/src-tauri/target/
+frontend/src-tauri/gen/android/
+frontend/src-tauri/gen/apple/
+
+# APK/IPA distribuidos separadamente
+*.apk
+*.idsig
+*.ipa

@@ -1,14 +1,27 @@
 {
   "name": "rls-backup-frontend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "RLS Automação Industrial - Interface de Backup",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:android": "tauri android dev",
+    "tauri:android:build": "tauri android build",
+    "tauri:ios": "tauri ios dev",
+    "tauri:ios:build": "tauri ios build",
+    "tauri:icon": "tauri icon public/Logo_oficial.svg"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-http": "^2",
+    "@tauri-apps/plugin-notification": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-store": "^2",
     "axios": "^1.7.7",
     "recharts": "^2.13.3",
     "lucide-react": "^0.447.0",
@@ -17,6 +30,7 @@
     "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.2",

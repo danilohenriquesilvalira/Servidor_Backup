@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { isTauri, isServerConfigured } from './utils/platform'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Files from './pages/Files'
@@ -7,6 +8,10 @@ import Shared from './pages/Shared'
 import Admin from './pages/Admin'
 import Logs from './pages/Logs'
 import Layout from './components/Layout'
+import ServerConfig from './pages/ServerConfig'
+
+// Tauri usa HashRouter (compatível com tauri:// e http://localhost em mobile)
+const Router = isTauri() ? HashRouter : BrowserRouter
 
 function PrivateRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth()
@@ -24,10 +29,17 @@ function PrivateRoute({ children, adminOnly = false }) {
 }
 
 export default function App() {
+  // Em ambiente nativo (Tauri) sem servidor configurado, exibe tela de setup primeiro
+  const needsSetup = isTauri() && !isServerConfigured()
+
   return (
-    <BrowserRouter>
+    <Router>
       <AuthProvider>
         <Routes>
+          {needsSetup && (
+            <Route path="*" element={<ServerConfig />} />
+          )}
+          <Route path="/setup" element={<ServerConfig />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={
             <PrivateRoute><Layout /></PrivateRoute>
@@ -43,6 +55,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
-    </BrowserRouter>
+    </Router>
   )
 }

@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Permissoes padrao para todas as plataformas",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "http:default",
+    "notification:default",
+    "store:default",
+    "fs:default"
+  ]
+}

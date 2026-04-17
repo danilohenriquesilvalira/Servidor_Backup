@@ -1,27 +1,30 @@
 import axios from 'axios'
+import { isTauri, getServerUrl } from '../utils/platform'
 
-// URL vazia = chamadas relativas (/api/...) — o nginx faz o proxy para o backend.
-// Isso funciona independente do IP ou rede usada para acessar o servidor.
 const api = axios.create({
-  baseURL: '',
   timeout: 300000 // 5 minutos para uploads grandes
 })
 
-// Interceptor: adicionar token salvo
+// Resolve URL dinamicamente: Tauri usa servidor configurado, web usa proxy relativo
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('rls_token')
   if (token) config.headers['Authorization'] = `Bearer ${token}`
+
+  if (isTauri() && config.url && !config.url.startsWith('http')) {
+    const serverUrl = getServerUrl()
+    if (serverUrl) config.url = `${serverUrl}${config.url}`
+  }
+
   return config
 })
 
-// Interceptor: tratar 401 global
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('rls_token')
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+      if (window.location.hash !== '#/login' && window.location.pathname !== '/login') {
+        window.location.href = isTauri() ? '/#/login' : '/login'
       }
     }
     return Promise.reject(error)

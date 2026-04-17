@@ -1,8 +1,9 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, FolderOpen, Users, Activity, X, Globe, LogOut
+  LayoutDashboard, FolderOpen, Users, Activity, X, Globe, LogOut, ServerCog
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { isTauri, clearServerConfig } from '../utils/platform'
 import RLSLogo from './RLSLogo'
 
 const NAV = [
@@ -49,6 +50,13 @@ function NavItem({ to, icon: Icon, label, exact }) {
 
 export default function Sidebar({ open, onClose }) {
   const { user, isAdmin, logout } = useAuth()
+  const navigate = useNavigate()
+
+  function handleChangeServer() {
+    logout()
+    clearServerConfig()
+    navigate('/setup', { replace: true })
+  }
 
   return (
     <aside className={`
@@ -103,13 +111,24 @@ export default function Sidebar({ open, onClose }) {
             <p className="text-[11px] font-black text-[#000000] truncate uppercase tracking-tight">{user?.name}</p>
             <p className="text-[9px] text-[#0B3904] font-black uppercase opacity-60">{user?.role}</p>
           </div>
-          <button 
-             onClick={logout} 
-             title="Sair do Sistema"
-             className="p-1.5 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
-          >
-             <LogOut size={16} />
-          </button>
+          <div className="flex items-center gap-0.5">
+            {isTauri() && (
+              <button
+                onClick={handleChangeServer}
+                title="Trocar Servidor"
+                className="p-1.5 rounded-lg text-gray-300 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-90"
+              >
+                <ServerCog size={16} />
+              </button>
+            )}
+            <button
+              onClick={logout}
+              title="Sair do Sistema"
+              className="p-1.5 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </aside>
