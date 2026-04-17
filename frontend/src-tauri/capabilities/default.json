@@ -5,8 +5,10 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "http:default",
-    "http:allow-fetch",
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [{ "url": "http://**" }, { "url": "https://**" }]
+    },
     "notification:default",
     "store:default",
     "fs:default"
