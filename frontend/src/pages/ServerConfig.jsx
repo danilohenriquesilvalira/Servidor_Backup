@@ -22,7 +22,7 @@ async function testConnection(targetUrl) {
 }
 
 export default function ServerConfig() {
-  const [url, setUrl] = useState('http://')
+  const [url, setUrl] = useState('http://192.168.1.70:3009')
   const [testing, setTesting] = useState(false)
   const [status, setStatus] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
@@ -33,7 +33,7 @@ export default function ServerConfig() {
 
   async function handleSave(skipTest = false) {
     if (!isValid) {
-      setErrorMsg('Informe o endereço completo (ex: http://192.168.1.100:3010)')
+      setErrorMsg('Informe o endereço completo (ex: http://192.168.1.70:3009)')
       setStatus('error')
       return
     }
@@ -84,14 +84,14 @@ export default function ServerConfig() {
               value={url}
               onChange={e => { setUrl(e.target.value); setStatus(null) }}
               onKeyDown={e => e.key === 'Enter' && handleSave()}
-              placeholder="http://192.168.1.100:3010"
+              placeholder="http://192.168.1.70:3009"
               className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-colors"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
             <p className="text-xs text-slate-500 mt-1.5">
-              IP do servidor na rede + porta 3010 (ex: http://192.168.1.100:3010)
+              IP do servidor na rede + porta 3009 (ex: http://192.168.1.70:3009)
             </p>
           </div>
 
