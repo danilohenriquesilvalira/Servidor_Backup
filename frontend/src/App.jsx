@@ -1,4 +1,5 @@
-import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { isTauri, isServerConfigured } from './utils/platform'
 import Login from './pages/Login'
@@ -10,8 +11,21 @@ import Logs from './pages/Logs'
 import Layout from './components/Layout'
 import ServerConfig from './pages/ServerConfig'
 
-// Tauri usa HashRouter (compatível com tauri:// e http://localhost em mobile)
 const Router = isTauri() ? HashRouter : BrowserRouter
+
+// Redireciona para /setup se estiver em Tauri sem servidor configurado
+function SetupGuard({ children }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (isTauri() && !isServerConfigured() && location.pathname !== '/setup') {
+      navigate('/setup', { replace: true })
+    }
+  }, [navigate, location.pathname])
+
+  return children
+}
 
 function PrivateRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth()
@@ -29,31 +43,27 @@ function PrivateRoute({ children, adminOnly = false }) {
 }
 
 export default function App() {
-  // Em ambiente nativo (Tauri) sem servidor configurado, exibe tela de setup primeiro
-  const needsSetup = isTauri() && !isServerConfigured()
-
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {needsSetup && (
-            <Route path="*" element={<ServerConfig />} />
-          )}
-          <Route path="/setup" element={<ServerConfig />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={
-            <PrivateRoute><Layout /></PrivateRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="files" element={<Files />} />
-            <Route path="shared" element={<Shared />} />
-            <Route path="admin" element={
-              <PrivateRoute adminOnly><Admin /></PrivateRoute>
-            } />
-            <Route path="logs" element={<Logs />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <SetupGuard>
+          <Routes>
+            <Route path="/setup" element={<ServerConfig />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <PrivateRoute><Layout /></PrivateRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="files" element={<Files />} />
+              <Route path="shared" element={<Shared />} />
+              <Route path="admin" element={
+                <PrivateRoute adminOnly><Admin /></PrivateRoute>
+              } />
+              <Route path="logs" element={<Logs />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </SetupGuard>
       </AuthProvider>
     </Router>
   )

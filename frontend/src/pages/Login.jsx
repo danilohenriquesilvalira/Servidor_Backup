@@ -27,7 +27,7 @@ export default function Login() {
     try {
       await login(form.email, form.password)
     } catch (err) {
-      setError(err.response?.data?.error || 'Credenciais invalidas. Tente novamente.')
+      setError(err.response?.data?.error || err.message || 'Erro ao conectar. Verifique o servidor.')
     } finally {
       setLoad(false)
     }

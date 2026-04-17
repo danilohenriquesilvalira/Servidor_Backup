@@ -1,12 +1,11 @@
 import axios from 'axios'
 import { isTauri, getServerUrl } from '../utils/platform'
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 
-// Adapter nativo para Tauri: usa tauri-plugin-http (Rust) em vez do XHR do WebView.
-// Bypassa completamente o bloqueio mixed-content (https://tauri.localhost -> http://servidor).
+// Adapter nativo Tauri: usa Rust (tauri-plugin-http) em vez do WebView XHR.
+// Bypassa bloqueio mixed-content (https://tauri.localhost -> http://servidor local).
 async function tauriAdapter(config) {
-  const { fetch: nativeFetch } = await import('@tauri-apps/plugin-http')
-
-  // Extrai headers — AxiosHeaders para objeto plano
+  // Extrai headers — AxiosHeaders para objeto plano de strings
   const rawHeaders = config.headers
   const headers = {}
   if (rawHeaders) {
@@ -18,13 +17,12 @@ async function tauriAdapter(config) {
     }
   }
 
-  // Prepara body e Content-Type
-  let body
+  // Body + Content-Type
   const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData
+  let body
   if (config.data !== undefined && config.data !== null) {
     if (isFormData) {
       body = config.data
-      // Deixa o runtime definir o Content-Type com o boundary correto
       delete headers['Content-Type']
       delete headers['content-type']
     } else {
@@ -42,20 +40,20 @@ async function tauriAdapter(config) {
 
   let res
   try {
-    res = await nativeFetch(config.url, {
+    res = await tauriFetch(config.url, {
       method: (config.method || 'GET').toUpperCase(),
       headers,
       body,
       signal: controller.signal,
     })
-  } catch (networkErr) {
+  } catch (e) {
     clearTimeout(timer)
-    if (networkErr.name === 'AbortError') {
-      const err = new Error(`Timeout: servidor nao respondeu em ${timeout / 1000}s`)
+    if (e?.name === 'AbortError') {
+      const err = new Error(`Timeout: servidor não respondeu em ${timeout / 1000}s`)
       err.config = config
       throw err
     }
-    const err = new Error('Servidor nao encontrado. Verifique o endereco e a conexao de rede.')
+    const err = new Error(`Não foi possível conectar ao servidor: ${e?.message || 'erro de rede'}`)
     err.config = config
     throw err
   }
@@ -66,7 +64,7 @@ async function tauriAdapter(config) {
   try { data = JSON.parse(text) } catch { data = text }
 
   if (res.status >= 400) {
-    const err = new Error(`Request failed with status code ${res.status}`)
+    const err = new Error(`HTTP ${res.status}`)
     err.response = { status: res.status, data, headers: {}, config }
     err.config = config
     throw err
@@ -83,14 +81,15 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('rls_token')
   if (token) config.headers['Authorization'] = `Bearer ${token}`
 
-  // Timeout: upload = 5 min, requests normais = 20s
-  const isUpload = typeof FormData !== 'undefined' && config.data instanceof FormData
-  config.timeout = isUpload ? 300000 : 20000
+  // Timeout: FormData (upload) = 5 min, resto = 20s
+  config.timeout = (typeof FormData !== 'undefined' && config.data instanceof FormData) ? 300000 : 20000
 
-  // Prepend URL do servidor (Tauri + URL relativa)
+  // Prepend URL do servidor (apenas Tauri + URL relativa)
   if (isTauri() && config.url && !config.url.startsWith('http')) {
     const serverUrl = getServerUrl()
-    if (serverUrl) config.url = `${serverUrl}${config.url}`
+    if (serverUrl) {
+      config.url = `${serverUrl}${config.url}`
+    }
   }
 
   return config

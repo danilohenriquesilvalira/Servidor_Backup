@@ -1,30 +1,46 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Server, Wifi, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
-import { setServerUrl } from '../utils/platform'
+import { Server, Wifi, CheckCircle, AlertCircle, ArrowRight, SkipForward } from 'lucide-react'
+import { setServerUrl, isTauri } from '../utils/platform'
+
+// Usa o fetch nativo do Tauri (bypassa mixed-content) ou o fetch do browser
+async function testConnection(targetUrl) {
+  try {
+    let fetchFn = window.fetch
+    if (isTauri()) {
+      const { fetch: tf } = await import('@tauri-apps/plugin-http')
+      fetchFn = tf
+    }
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+    const res = await fetchFn(`${targetUrl}/health`, { signal: controller.signal })
+    clearTimeout(timer)
+    return res.ok
+  } catch {
+    return false
+  }
+}
 
 export default function ServerConfig() {
   const [url, setUrl] = useState('http://')
   const [testing, setTesting] = useState(false)
-  const [status, setStatus] = useState(null) // 'ok' | 'error'
+  const [status, setStatus] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
   const navigate = useNavigate()
 
-  async function testConnection(targetUrl) {
-    const normalized = targetUrl.trim().replace(/\/$/, '')
-    try {
-      const res = await fetch(`${normalized}/health`, { signal: AbortSignal.timeout(5000) })
-      return res.ok
-    } catch {
-      return false
-    }
-  }
+  const normalized = url.trim().replace(/\/$/, '')
+  const isValid = normalized.startsWith('http://') || normalized.startsWith('https://')
 
-  async function handleSave() {
-    const normalized = url.trim().replace(/\/$/, '')
-    if (!normalized || normalized === 'http://' || normalized === 'https://') {
-      setErrorMsg('Informe o endereço do servidor')
+  async function handleSave(skipTest = false) {
+    if (!isValid) {
+      setErrorMsg('Informe o endereço completo (ex: http://192.168.1.100:3010)')
       setStatus('error')
+      return
+    }
+
+    if (skipTest) {
+      setServerUrl(normalized)
+      navigate('/login', { replace: true })
       return
     }
 
@@ -38,10 +54,10 @@ export default function ServerConfig() {
     if (ok) {
       setServerUrl(normalized)
       setStatus('ok')
-      setTimeout(() => navigate('/login', { replace: true }), 800)
+      setTimeout(() => navigate('/login', { replace: true }), 700)
     } else {
       setStatus('error')
-      setErrorMsg('Servidor não respondeu. Verifique o endereço e se o servidor está online.')
+      setErrorMsg('Não conseguiu conectar. Verifique se o servidor está online e o endereço está correto.')
     }
   }
 
@@ -54,7 +70,7 @@ export default function ServerConfig() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">Configurar Servidor</h1>
           <p className="text-slate-400 text-sm">
-            Informe o endereço do servidor RLS Backup da sua empresa
+            Informe o endereço do servidor RLS Backup
           </p>
         </div>
 
@@ -75,7 +91,7 @@ export default function ServerConfig() {
               spellCheck="false"
             />
             <p className="text-xs text-slate-500 mt-1.5">
-              Exemplo: http://192.168.1.100:3010 ou https://backup.suaempresa.com
+              IP do servidor na rede + porta 3010 (ex: http://192.168.1.100:3010)
             </p>
           </div>
 
@@ -87,15 +103,24 @@ export default function ServerConfig() {
           )}
 
           {status === 'error' && (
-            <div className="flex items-start gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span className="text-sm">{errorMsg}</span>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="text-sm">{errorMsg}</span>
+              </div>
+              <button
+                onClick={() => handleSave(true)}
+                className="w-full flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded-xl px-4 py-2.5 transition-colors"
+              >
+                <SkipForward className="w-4 h-4" />
+                Salvar sem testar e continuar
+              </button>
             </div>
           )}
 
           <button
-            onClick={handleSave}
-            disabled={testing || status === 'ok'}
+            onClick={() => handleSave(false)}
+            disabled={testing || status === 'ok' || !isValid}
             className="w-full flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl px-4 py-3 transition-colors"
           >
             {testing ? (
@@ -105,16 +130,14 @@ export default function ServerConfig() {
               </>
             ) : (
               <>
-                Conectar
+                Testar e Conectar
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </div>
 
-        <p className="text-center text-xs text-slate-600 mt-6">
-          RLS Automação Industrial — v2.0
-        </p>
+        <p className="text-center text-xs text-slate-600 mt-6">RLS Automação Industrial — v2.0</p>
       </div>
     </div>
   )
