@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -36,8 +39,6 @@ jobs:
       - name: Build Windows installer
         working-directory: frontend
         run: npx tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
 
       - name: Upload Windows MSI
         uses: actions/upload-artifact@v4
@@ -54,15 +55,13 @@ jobs:
           if-no-files-found: warn
 
       - name: Create Release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v2.0.${{ github.run_number }}
-          name: RLS Backup v2.0.${{ github.run_number }}
+          name: "RLS Backup v2.0.${{ github.run_number }} - Windows"
           files: |
             frontend/src-tauri/target/release/bundle/msi/*.msi
             frontend/src-tauri/target/release/bundle/nsis/*.exe
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: false
