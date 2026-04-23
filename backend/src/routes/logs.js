@@ -6,7 +6,9 @@ export default async function logRoutes(fastify) {
   // GET /api/logs — listar logs (admin vê tudo, user vê os próprios)
   fastify.get('/', { preHandler: authenticate }, async (request) => {
     const { page = 1, limit = 50, userId, action, search, since } = request.query
-    const offset  = (page - 1) * limit
+    const safeLimit = Math.min(Math.max(parseInt(limit) || 50, 1), 200)
+    const safePage  = Math.max(parseInt(page) || 1, 1)
+    const offset    = (safePage - 1) * safeLimit
     const isAdmin = request.user.role === 'admin'
 
     let conditions = []
@@ -41,7 +43,7 @@ export default async function logRoutes(fastify) {
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
-    const dataParams = [...params, limit, offset]
+    const dataParams = [...params, safeLimit, offset]
 
     const { rows } = await query(
       `SELECT l.id, l.action, l.resource_type, l.resource_id, l.details,
@@ -64,8 +66,8 @@ export default async function logRoutes(fastify) {
     return {
       logs:  rows,
       total: parseInt(countRows[0].count),
-      page:  parseInt(page),
-      limit: parseInt(limit)
+      page:  safePage,
+      limit: safeLimit
     }
   })
 

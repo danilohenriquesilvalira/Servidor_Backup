@@ -47,6 +47,11 @@ export default function Admin() {
     e.preventDefault()
     setError('')
     setSaving(true)
+    if (!editing && !form.password.trim()) {
+      setError('Senha obrigatória para novo usuário')
+      setSaving(false)
+      return
+    }
     try {
       const payload = {
         name: form.name,
@@ -55,7 +60,6 @@ export default function Admin() {
         storageLimitGb: form.storageLimitGb !== '' ? parseFloat(form.storageLimitGb) : null,
       }
       if (form.password) payload.password = form.password
-      if (!editing)       payload.password = form.password
 
       if (editing) {
         await api.put(`/api/users/${editing.id}`, payload)
@@ -141,9 +145,9 @@ export default function Admin() {
               </thead>
               <tbody className="divide-y divide-gray-300">
                 {users.map(user => (
-                  <tr key={user.id} className="table-row">
+                  <tr key={user.id} className="table-row group">
                     <td className="td">
-                      <div className="flex items-center gap-4 group">
+                      <div className="flex items-center gap-4">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-lg
                           ${user.active ? 'bg-[#0B3904]' : 'bg-gray-400'}`}>
                           {user.name.charAt(0).toUpperCase()}
@@ -171,7 +175,7 @@ export default function Admin() {
                       </div>
                     </td>
                     <td className="td">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-2 transition-all">
                         <button onClick={() => openEdit(user)} className="p-2.5 rounded-xl bg-white border-2 border-gray-200 text-gray-400 hover:text-slate-900 hover:border-slate-200 transition-all">
                           <Edit2 size={16} />
                         </button>

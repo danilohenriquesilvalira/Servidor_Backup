@@ -2,8 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { X, Upload, FolderOpen, CheckCircle, AlertCircle, File } from 'lucide-react'
 import api, { formatBytes } from '../services/api'
 
-export default function UploadModal({ currentFolderId, currentFolderName, onClose, onSuccess }) {
-  const [files, setFiles] = useState([])
+export default function UploadModal({ currentFolderId, currentFolderName, onClose, onSuccess, initialFiles = [] }) {
+  const [files, setFiles] = useState(initialFiles)
   const [folderId, setFolderId] = useState(currentFolderId || '')
   const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)

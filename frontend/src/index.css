@@ -50,14 +50,17 @@
   .badge-red   { @apply badge bg-danger text-white; }
   .badge-gray  { @apply badge bg-gray-800 text-white; }
 
-  /* Tabela de Alta Visibilidade (Sem Card Look) */
-  .table-container { @apply w-full bg-white border-x border-t border-gray-300 rounded-t-2xl overflow-hidden shadow-sm; }
-  .table-row { @apply border-b border-gray-300 hover:bg-gray-50 transition-colors; }
-  .th { 
-    @apply text-left px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] 
-           bg-[#0B3904] text-white border-b border-white/10 sticky top-0 z-20; 
+  /* Tabela */
+  .table-wrap { @apply bg-white rounded-2xl border border-gray-200 shadow-sm; }
+  .table-container { @apply w-full bg-white; }
+  .table-row { @apply border-b border-gray-100 hover:bg-gray-50/80 transition-colors; }
+  .th {
+    @apply text-left px-5 py-3.5 text-[10px] font-black uppercase tracking-[0.2em]
+           bg-[#0B3904] text-white sticky top-0 z-20;
   }
-  .td { @apply px-6 py-5 text-sm text-black font-bold; }
+  .th-first { @apply th rounded-tl-2xl; }
+  .th-last  { @apply th rounded-tr-2xl; }
+  .td { @apply px-5 py-4 text-sm text-black font-bold align-middle; }
 }
 
 @keyframes fadeIn {

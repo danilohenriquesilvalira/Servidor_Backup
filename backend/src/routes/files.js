@@ -314,6 +314,28 @@ export default async function fileRoutes(fastify) {
   })
 
   // ─────────────────────────────────────────────────────────────
+  // PATCH /api/files/:id/rename
+  // ─────────────────────────────────────────────────────────────
+  fastify.patch('/:id/rename', { preHandler: authenticate }, async (request, reply) => {
+    const { name } = request.body
+    if (!name?.trim()) return reply.code(400).send({ error: 'Nome inválido' })
+
+    const { rows } = await query('SELECT * FROM files WHERE id = $1', [request.params.id])
+    if (!rows[0]) return reply.code(404).send({ error: 'Arquivo não encontrado' })
+
+    const file = rows[0]
+    if (file.user_id !== request.user.id && request.user.role !== 'admin')
+      return reply.code(403).send({ error: 'Sem permissão' })
+
+    await query('UPDATE files SET original_name = $1, updated_at = NOW() WHERE id = $2', [name.trim(), file.id])
+
+    await logActivity(pool, request.user.id, 'FILE_RENAME', 'file', file.id,
+      { from: file.original_name, to: name.trim() }, request.ip)
+
+    return { success: true }
+  })
+
+  // ─────────────────────────────────────────────────────────────
   // GET /api/files/:id/versions
   // ─────────────────────────────────────────────────────────────
   fastify.get('/:id/versions', { preHandler: authenticate }, async (request, reply) => {
