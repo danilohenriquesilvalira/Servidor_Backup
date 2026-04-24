@@ -24,7 +24,7 @@ services:
       - ./frontend/src:/app/src         # hot module replacement instantaneo
       - ./frontend/public:/app/public   # logo e assets publicos
     ports:
-      - "${FRONTEND_PORT:-3009}:3000"
+      - "${DEV_FRONTEND_PORT:-3019}:3000"
     environment:
       VITE_BACKEND_URL: http://backend:3001
     command: npm run dev -- --host 0.0.0.0

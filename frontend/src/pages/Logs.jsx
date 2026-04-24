@@ -11,12 +11,13 @@ import { useAuth } from '../context/AuthContext'
 
 const CARD_ST = 'bg-white rounded-2xl border border-[#C41C1C]/10 shadow-sm'
 
+const BADGE = 'inline-flex items-center px-2.5 py-1 rounded-md bg-[#0B3904] text-white text-[9px] font-black uppercase tracking-wider'
 const ACTION_COLORS = {
-  LOGIN:            'inline-flex items-center px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-[9px] font-black uppercase ring-1 ring-green-100',
-  LOGIN_FAILED:     'inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 text-red-700 text-[9px] font-black uppercase ring-1 ring-red-100',
-  FILE_UPLOAD:      'inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[9px] font-black uppercase ring-1 ring-blue-100',
-  FILE_DOWNLOAD:    'inline-flex items-center px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 text-[9px] font-black uppercase ring-1 ring-violet-100',
-  FILE_DELETE:      'inline-flex items-center px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 text-[9px] font-black uppercase ring-1 ring-orange-100',
+  LOGIN:            BADGE,
+  LOGIN_FAILED:     `inline-flex items-center px-2.5 py-1 rounded-md bg-[#C41C1C] text-white text-[9px] font-black uppercase tracking-wider`,
+  FILE_UPLOAD:      BADGE,
+  FILE_DOWNLOAD:    BADGE,
+  FILE_DELETE:      BADGE,
 }
 
 const DATE_PRESETS = [
@@ -140,28 +141,28 @@ export default function Logs() {
             <table className="w-full text-sm border-separate border-spacing-0">
               <thead className="sticky top-0 z-10 bg-white shadow-sm">
                 <tr>
-                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">Evento</th>
-                  {isAdmin && <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 hidden sm:table-cell">Responsável</th>}
-                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 hidden md:table-cell">Referência</th>
-                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 hidden lg:table-cell">IP ORIGEM</th>
-                  <th className="text-right px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100">Horário</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-700 border-b border-gray-200">Evento</th>
+                  {isAdmin && <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-700 border-b border-gray-200 hidden sm:table-cell">Responsável</th>}
+                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-700 border-b border-gray-200 hidden md:table-cell">Referência</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-700 border-b border-gray-200 hidden lg:table-cell">IP ORIGEM</th>
+                  <th className="text-right px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-700 border-b border-gray-200">Horário</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-200">
                 {logs.map(log => (
                   <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4"><span className={ACTION_COLORS[log.action] || 'inline-flex items-center px-2 py-0.5 rounded-md bg-gray-50 text-gray-500 text-[9px] font-black uppercase ring-1 ring-gray-100'}>{getActionLabel(log.action)}</span></td>
+                    <td className="px-6 py-4"><span className={ACTION_COLORS[log.action] || 'inline-flex items-center px-2.5 py-1 rounded-md bg-[#0B3904] text-white text-[9px] font-black uppercase tracking-wider'}>{getActionLabel(log.action)}</span></td>
                     {isAdmin && (
                       <td className="px-6 py-4 hidden sm:table-cell">
                         <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0"><span className="text-[10px] font-black text-gray-500">{log.user_name?.charAt(0).toUpperCase()}</span></div>
-                          <span className="text-xs font-bold text-gray-700 truncate">{log.user_name}</span>
+                          <div className="w-7 h-7 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0"><span className="text-[10px] font-black text-gray-800">{log.user_name?.charAt(0).toUpperCase()}</span></div>
+                          <span className="text-xs font-bold text-gray-900 truncate">{log.user_name}</span>
                         </div>
                       </td>
                     )}
-                    <td className="px-6 py-4 hidden md:table-cell text-xs text-gray-500 font-medium truncate max-w-[250px]">{(log.details?.name || log.details?.email || '—')}</td>
-                    <td className="px-6 py-4 hidden lg:table-cell text-[10px] font-mono text-gray-400">{log.ip_address}</td>
-                    <td className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase whitespace-nowrap">{formatDate(log.created_at)}</td>
+                    <td className="px-6 py-4 hidden md:table-cell text-xs text-gray-800 font-medium truncate max-w-[250px]">{(log.details?.name || log.details?.email || '—')}</td>
+                    <td className="px-6 py-4 hidden lg:table-cell text-[10px] font-mono text-gray-700">{log.ip_address}</td>
+                    <td className="px-6 py-4 text-right text-[10px] font-black text-gray-700 uppercase whitespace-nowrap">{formatDate(log.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

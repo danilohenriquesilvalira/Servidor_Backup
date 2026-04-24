@@ -22,9 +22,6 @@ export default function Header({ onMenuClick }) {
   return (
     <>
       <header className="relative bg-white border-b border-gray-200 h-14 flex items-center px-4 lg:px-5 gap-3 flex-shrink-0">
-        {/* Linha vermelha topo — alinhada com a sidebar */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-rls-red" />
-
         <button
           onClick={onMenuClick}
           className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
