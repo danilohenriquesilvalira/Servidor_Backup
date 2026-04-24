@@ -4,7 +4,7 @@ import { Server, ArrowRight } from 'lucide-react'
 import { setServerUrl } from '../utils/platform'
 
 export default function ServerConfig() {
-  const [url, setUrl] = useState('http://192.168.1.70:3009')
+  const [url, setUrl] = useState('http://10.45.235.165')
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
@@ -43,14 +43,14 @@ export default function ServerConfig() {
               value={url}
               onChange={e => { setUrl(e.target.value); setError('') }}
               onKeyDown={e => e.key === 'Enter' && handleSave()}
-              placeholder="http://192.168.1.70:3009"
+              placeholder="http://10.45.235.165"
               className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-colors"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
             <p className="text-xs text-slate-500 mt-1.5">
-              IP do servidor na rede + porta 3009 (ex: http://192.168.1.70:3009)
+              Domínio local ou IP do servidor (ex: http://10.45.235.165)
             </p>
           </div>
 
